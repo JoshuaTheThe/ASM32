@@ -3,6 +3,10 @@
 _start: LDI     $00, _stack
         BL      $00,$00,_foo
         HLT
-_foo:   ENTER   $0
-        LDI     $02, 1
+PROCEDURE _foo
+        INT i
+        INT j
+        LDI     $02,$1
+        STW     $02,$00,j
+        LDW     $02,$00,j
         LEAVE

@@ -268,3 +268,15 @@ macro LEAVE {
         STW     $02, $0E, $08
         CTS     $0E
 }
+
+macro PROCEDURE name {
+        current_offset equ 4
+        name:
+        ENTER $0
+}
+
+macro INT name {
+        current_offset equ (current_offset + 4)
+        name equ current_offset
+        LDI     $0C,$4
+}

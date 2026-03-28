@@ -278,9 +278,8 @@ macro PROCEDURE name {
 macro INT name {
         current_offset equ (current_offset + 4)
         name equ current_offset
-        LDI     $0C,$4
 }
 
 macro DESTROY name {
-        name equ
+        purge name
 }

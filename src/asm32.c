@@ -268,5 +268,21 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                 Temp += 4;
                 asm32_write_register(cpu, mem, 0x00, Temp, error);
                 break;
+        case 0x8:       // ADD
+                break;
+        case 0x9:       // SUB
+                break;
+        case 0xA:       // XOR
+                break;
+        case 0xB:       // ORR
+                break;
+        case 0xC:       // AND
+                break;
+        case 0xD:       // ROL
+                break;
+        case 0xE:       // EXT
+                break;
+        case 0xF:       // LDI
+                break;
         }
 }

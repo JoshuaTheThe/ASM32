@@ -5,11 +5,15 @@
 - little endian
 
 # Registers
-| Name | Description | Bits |
-| - | - | - |
-| `R0` | note: Stack Pointer | 32 |
-| `R1` | note: Link Register | 32 |
-| `R15` | note: Program Counter | 32 |
+| Name | Description | Bits | Saved By |
+| - | - | - | - |
+| `R0` | note: Stack Pointer | 32 | Callee |
+| `R1` | note: Link Register | 32 | Callee |
+| `R2` | note: By Convention, return value | 32 | Caller |
+| `R3-R7` | note: By Convention, Argument | 32 | Caller |
+| `R8-R13` | note: By Convention, Scratch | 32 | Caller |
+| `R14` | note: By Convention, Data Pointer | 32 | Caller |
+| `R15` | note: Program Counter | 32 | Caller |
 | `R[0-15]` | Register File Entry | 32 |
 | `RP` | Register File Pointer | 32 |
 

@@ -165,23 +165,25 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
         static const uint8_t required_bytes[16] = {1,1,3,3,4,2,1,1,2,2,2,2,2,2,2,5};
         const virtual pc      = asm32_read_register(cpu, mem, 0x0F, error);
         if (error && *error) return;
-        const uint64_t opcode = asm32_read_instruction(cpu, mem, pc, error);
+        const uint64_t instruction = asm32_read_instruction(cpu, mem, pc, error);
         if (error && *error) return;
-        asm32_write_word(cpu, mem, 0x0F, pc + required_bytes[opcode & 0x0F], error);
+        asm32_write_word(cpu, mem, 0x0F, pc + required_bytes[instruction & 0x0F], error);
 
-        const uint8_t  Ra         = (opcode >>  4) & 0xF;
-        const uint8_t  Rb         = (opcode >>  8) & 0xF;
-        const uint8_t  Rc         = (opcode >> 12) & 0xF;
-        const bool     WordOrByte = (opcode >> 19) & 0x01;
-        const uint32_t I11        = asm32_sign_extend_11((opcode >>  8) & 0x07FF);
-        const uint32_t I16        = asm32_sign_extend_16((opcode >> 16) & 0xFFFF);
-        const uint32_t I32        = (opcode >>  8) & 0xFFFFFFFF;
-        const uint32_t Cond       = (opcode >>  8) & 0x07;
-        const uint32_t Link       = (opcode >> 12) & 0x01;
+        const uint8_t  Ra         = (instruction >>  4) & 0xF;
+        const uint8_t  Rb         = (instruction >>  8) & 0xF;
+        const uint8_t  Rc         = (instruction >> 12) & 0xF;
+        const bool     WordOrByte = (instruction >> 19) & 0x01;
+        const uint32_t I11        = asm32_sign_extend_11((instruction >>  8) & 0x07FF);
+        const uint32_t I16        = asm32_sign_extend_16((instruction >> 16) & 0xFFFF);
+        const uint32_t I32        = (instruction >>  8) & 0xFFFFFFFF;
+        const uint32_t Cond       = (instruction >>  8) & 0x07;
+        const uint32_t Link       = (instruction >> 12) & 0x01;
+        const uint8_t  Opcode     = instruction & 0xF;
+        
         uint32_t Temp             = 0;
         uint32_t Base             = 0;
 
-        switch (opcode & 0xF)
+        switch (Opcode)
         {
         case 0x00:      // CTX
                 asm32_write_register(cpu, mem, Ra, cpu->rp, error);

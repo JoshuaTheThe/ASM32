@@ -105,6 +105,19 @@ uint32_t asm32_write_word(asm32_t const *const cpu, memory *mem, virtual address
         return value;
 }
 
+ // largest op is 5 bytes, so we fetch whole for performance
+uint64_t asm32_read_instruction(asm32_t const *const cpu, memory *mem, virtual address, bool *const error)
+{
+        uint64_t word = 0, i;
+        for (i = 0; i < 5; ++i)
+        {
+                word |= asm32_read_byte(cpu, mem, address+i, error) << (i * 8);
+                if (error && *error) return 0;
+        }
+
+        return word;
+}
+
 bool asm32_reset(asm32_t *const cpu, memory *mem)
 {
         bool error = false;
@@ -118,4 +131,79 @@ bool asm32_reset(asm32_t *const cpu, memory *mem)
         cpu->rp             = 0x000000C0;
         asm32_write_word(cpu, mem, cpu->rp + 15 * 4, 0x00000000, &error);
         return error;
+}
+
+uint32_t asm32_read_register(asm32_t *const cpu, memory *mem, uint8_t index, bool *const error)
+{
+        const virtual virt = lea_reg(cpu, index & 0xF);
+        const uint32_t value = asm32_read_word(cpu, mem, virt, error);
+        return value;
+}
+
+uint32_t asm32_write_register(asm32_t *const cpu, memory *mem, uint8_t index, uint32_t value, bool *const error)
+{
+        const virtual virt = lea_reg(cpu, index & 0xF);
+        return asm32_write_word(cpu, mem, virt, value, error);
+}
+
+uint32_t asm32_sign_extend_11(uint32_t val)
+{
+        if ((val >> 10) & 1)
+                return val | 0xFFFFF800;
+        return val & 0x000007FF;
+}
+
+uint32_t asm32_sign_extend_16(uint32_t val)
+{
+        if ((val >> 15) & 1)
+                return val | 0xFFFF0000;
+        return val & 0x0000FFFF;
+}
+
+void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
+{
+        static const uint8_t required_bytes[16] = {1,1,3,3,4,2,1,1,2,2,2,2,2,2,2,5};
+        const virtual pc      = asm32_read_register(cpu, mem, 0x0F, error);
+        if (error && *error) return;
+        const uint64_t opcode = asm32_read_instruction(cpu, mem, pc, error);
+        if (error && *error) return;
+        asm32_write_word(cpu, mem, 0x0F, pc + required_bytes[opcode & 0x0F], error);
+
+        const uint8_t  Ra         = (opcode >>  4) & 0xF;
+        const uint8_t  Rb         = (opcode >>  8) & 0xF;
+        const uint8_t  Rc         = (opcode >> 12) & 0xF;
+        const bool     WordOrByte = (opcode >> 19) & 0x01;
+        const uint32_t I11        = asm32_sign_extend_11((opcode >>  8) & 0x07FF);
+        const uint32_t I16        = asm32_sign_extend_16((opcode >> 16) & 0xFFFF);
+        const uint32_t I32        = (opcode >>  8) & 0xFFFFFFFF;
+        const uint32_t Cond       = (opcode >>  8) & 0x07;
+        const uint32_t Link       = (opcode >> 12) & 0x01;
+        uint32_t Temp             = 0;
+        uint32_t Base             = 0;
+
+        switch (opcode & 0xF)
+        {
+        case 0x00:      // CTX
+                asm32_write_register(cpu, mem, Ra, cpu->rp, error);
+                break;
+        case 0x01:      // CTS
+                cpu->rp = asm32_read_register(cpu, mem, Ra, error);
+                break;
+        case 0x2:       // LDW/LDB
+                Base = asm32_read_register(cpu, mem, Rb, error);
+                if (error && *error) return;
+                Temp = (WordOrByte) ? asm32_read_word(cpu, mem, (uint32_t)(*(int32_t *)&Base + *(int32_t *)&I11), error) :
+                                      asm32_read_byte(cpu, mem, (uint32_t)(*(int32_t *)&Base + *(int32_t *)&I11), error);
+                if (error && *error) return;
+                asm32_write_register(cpu, mem, Ra, Temp, error);
+                break;
+        case 0x4:       // STW/STB
+                Base = asm32_read_register(cpu, mem, Rb, error);
+                if (error && *error) return;
+                Temp = asm32_read_register(cpu, mem, Ra, error);
+                if (error && *error) return;
+                (WordOrByte) ? asm32_write_word(cpu, mem, (uint32_t)(*(int32_t *)&Base + *(int32_t *)&I11), Temp, error) :
+                               asm32_write_byte(cpu, mem, (uint32_t)(*(int32_t *)&Base + *(int32_t *)&I11), Temp, error);
+                break;
+        }
 }

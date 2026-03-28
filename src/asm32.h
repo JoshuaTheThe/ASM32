@@ -37,7 +37,11 @@ uint32_t asm32_read_byte(asm32_t const *const cpu, memory *mem, virtual address,
 uint32_t asm32_write_byte(asm32_t const *const cpu, memory *mem, virtual address, uint8_t value, bool *const error);
 uint32_t asm32_read_word(asm32_t const *const cpu, memory *mem, virtual address, bool *const error);
 uint32_t asm32_write_word(asm32_t const *const cpu, memory *mem, virtual address, uint32_t value, bool *const error);
+uint64_t asm32_read_instruction(asm32_t const *const cpu, memory *mem, virtual address, bool *const error);
 void     asm32_interrupt(asm32_t *const cpu, memory *mem, uint32_t code, bool *const error);
-bool asm32_reset(asm32_t *const cpu, memory *mem);
+bool     asm32_reset(asm32_t *const cpu, memory *mem);
+void     asm32_execute(asm32_t *const cpu, memory *mem, bool *const error);
+uint32_t asm32_read_register(asm32_t *const cpu, memory *mem, uint8_t index, bool *const error);
+uint32_t asm32_write_register(asm32_t *const cpu, memory *mem, uint8_t index, uint32_t value, bool *const error);
 
 #endif

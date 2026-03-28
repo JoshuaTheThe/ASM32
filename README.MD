@@ -44,9 +44,9 @@ On bootup, the Register File Pointer is set to `$C0`, and the Program Counter is
 |-|-|-|-|-|
 | `0000` | `CTX` | `Ra := RP` | `[4 bit Opcode][4 bit Ra]` 1 | 1 |
 | `0001` | `CTS` | `RP := Ra` | `[4 bit Opcode][4 bit Ra]` 2 | 1 |
-| `0010` | `LDW`,`LDB`  | `Ra := *Rb+i` | `[4 bit Opcode][4 bit Ra][4 bit Rb][11 bit i][1 bit, Word or Byte]` | 2 |
-| `0011` | `STW`,`STB`  | `*Rb+i := Ra` | `[4 bit Opcode][4 bit Ra][4 bit Rb][11 bit i][1 bit, Word or Byte]` | 2 |
-| `0100` | `B`,`BEQ`,`BLES`,`BGRE`,`BL`,`BLEQ`,`BLLES`,`BLGRE`,...  | `IF ConditionTrue: { R1 := Link ? next() : R1 R15 := R15 + sign_extend(i) }` | `[4 bit Opcode][4 bit Ra][4 bit Rb][16 bit i][3 bit Condition Code][1 bit Link]` | 4 |
+| `0010` | `LDW`,`LDB`  | `Ra := *Rb+i` | `[4 bit Opcode][4 bit Ra][4 bit Rb][11 bit i][1 bit, Word or Byte]` | 3 |
+| `0011` | `STW`,`STB`  | `*Rb+i := Ra` | `[4 bit Opcode][4 bit Ra][4 bit Rb][11 bit i][1 bit, Word or Byte]` | 3 |
+| `0100` | `B`,`BEQ`,`BLES`,`BGRE`,`BL`,`BLEQ`,`BLLES`,`BLGRE`,...  | `IF ConditionTrue: { R1 := Link ? next() : R1 R15 := R15 + sign_extend(i) }` | `[4 bit Opcode][4 bit Ra][4 bit Rb][3 bit Condition Code][1 bit Link][16 bit i]` | 4 |
 | `0101` | `LNK`,`LNKEQ`,`LNKLES`,`LNKGRE`,... | `IF ConditionTrue: R15 := R1` | `[4 bit Opcode][4 bit Ra][4 bit Rb][3 bit Condition Function][1 bit Unused]` | 2 |
 | `0110` | `PUL`  | `R0 := R0 - 04, Ra := *R0` | `[4 bit Opcode][4 bit Ra]` | 1 |
 | `0111` | `PUS`  | `*R0 := Ra, R0 := R0 + 04` | `[4 bit Opcode][4 bit Ra]` | 1 |
@@ -60,6 +60,7 @@ On bootup, the Register File Pointer is set to `$C0`, and the Program Counter is
 | `1111` | `LDI`  | `Ra := i` | `[4 bit Opcode][4 bit Ra][32 bit i]` | 5 |
 
 - `Bxx` doesn't affect top 4 bits, nor does `LINKxx`
+- `WordOrByte ? Word : Byte;`
 
 1. `get ConTeXt`
 2. `ConText Switch`

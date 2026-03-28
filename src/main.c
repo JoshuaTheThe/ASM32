@@ -32,11 +32,11 @@ int main(int argc, char **argv)
         do
         {
                 asm32_execute(&asm32, &mem, &error);
+                asm32_dump(&asm32, &mem, &error);
                 if (error)
                 {
                         asm32_interrupt(&asm32, &mem, 0x00, &error);
                         break;
                 }
         } while(!asm32.halt);
-        asm32_dump(&asm32, &mem, &error);
 }

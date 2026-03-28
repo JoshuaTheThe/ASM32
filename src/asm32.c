@@ -192,8 +192,8 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
         const uint8_t  Ra         = (instruction >>  4) & 0xF;
         const uint8_t  Rb         = (instruction >>  8) & 0xF;
         const uint8_t  Rc         = (instruction >> 12) & 0xF;
-        const bool     WordOrByte = (instruction >> 19) & 0x01;
-        const uint32_t I11        = asm32_sign_extend_11((instruction >> 9) & 0x07FF);
+        const bool     WordOrByte = (instruction >> 23) & 0x01;
+        const uint32_t I11        = asm32_sign_extend_11((instruction >> 12) & 0x07FF);
         const uint32_t I16        = asm32_sign_extend_16((instruction >> 16) & 0xFFFF);
         const uint32_t I32        = (instruction >>  8) & 0xFFFFFFFF;
         const uint32_t Cond       = (instruction >> 12) & 0x07;
@@ -356,19 +356,20 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
 void asm32_dump(asm32_t *const cpu, memory *mem, bool *const error)
 {
         int i;
+        fprintf(stderr,"\n\t");
         for (i = 0; i < 16; ++i)
         {
                 uint32_t val = asm32_read_register(cpu, mem, i, error);
                 if (error && *error)
                 {
-                        printf("r%.2d: ???????? = ???????? ", i);
+                        fprintf(stderr,"r%.2d: ???????? = ???????? ", i);
                 }
                 else
                 {
-                        printf("r%.2d: %.8x = %.8x ", i, lea_reg(cpu, i), val);
+                        fprintf(stderr,"r%.2d: %.8x = %.8x ", i, lea_reg(cpu, i), val);
                 }
                 if ((i & 0x03) == 0x03)
-                        printf("\n");
+                        fprintf(stderr,"\n\t");
         }
-        printf("rp: %.8x\n", cpu->rp);
+        fprintf(stderr," rp: %.8x\n\n", cpu->rp);
 }

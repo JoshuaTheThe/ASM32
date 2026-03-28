@@ -174,7 +174,7 @@ bool asm32_is_condition_true(asm32_t *const cpu, memory *mem, uint8_t Ra, uint8_
                 case 3: return left >= right;
                 case 4: return left >  right;
                 case 5: return left <= right;
-                case 6: return (uint32_t)left > (uint32_t)right;
+                case 6: return (uint32_t)left < (uint32_t)right;
                 default:
                 case 7: return true;
         }

@@ -73,5 +73,5 @@ On bootup, the Register File Pointer is set to `$C0`, and the Program Counter is
 | `011` | `GREEQ` | T |
 | `100` | `GRE` | T |
 | `101` | `LESEQ` | T |
-| `110` | `ABOVE` | F |
+| `110` | `BELOW` | F |
 | `111` | `ALWAYS` | N/A |

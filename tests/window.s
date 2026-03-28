@@ -3,6 +3,6 @@
 _start: LDI     $00, _stack
         BL      $00,$00,_foo
         HLT
-_foo:   ENTER
+_foo:   ENTER   $0
         LDI     $02, 1
         LEAVE

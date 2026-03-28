@@ -236,10 +236,10 @@ macro LDR ra, rb {
         ORR ra, rb, rb
 }
 
-macro ENTER {
+macro ENTER space {
         PUS     $0C
         PUS     $0D
-        LDI     $0D, $40
+        LDI     $0D, $40 + (space)
         AND     $0C, $00, $00
         ADD     $00, $00, $0D
         ;       set new sp

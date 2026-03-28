@@ -237,6 +237,8 @@ macro LDR ra, rb {
 }
 
 macro ENTER {
+        PUS     $0C
+        PUS     $0D
         LDI     $0D, $40
         AND     $0C, $00, $00
         ADD     $00, $00, $0D
@@ -255,6 +257,8 @@ macro ENTER {
         STW     $06, $0C, ($4 * $6)
         ;       switch
         CTS     $0C
+        PUL     $0D
+        PUL     $0C
         LNK     $00,$00
 .body:
 }

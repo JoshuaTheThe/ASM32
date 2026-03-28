@@ -199,7 +199,7 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                 if (error && *error) return;
                 asm32_write_register(cpu, mem, Ra, Temp, error);
                 break;
-        case 0x4:       // STW/STB
+        case 0x3:       // STW/STB
                 Base = asm32_read_register(cpu, mem, Rb, error);
                 if (error && *error) return;
                 Temp = asm32_read_register(cpu, mem, Ra, error);

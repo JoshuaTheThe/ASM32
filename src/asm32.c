@@ -111,7 +111,7 @@ uint64_t asm32_read_instruction(asm32_t const *const cpu, memory *mem, virtual a
         uint64_t word = 0, i;
         for (i = 0; i < 5; ++i)
         {
-                word |= asm32_read_byte(cpu, mem, address+i, error) << (i * 8);
+                word |= (uint64_t)asm32_read_byte(cpu, mem, address+i, error) << (i * 8);
                 if (error && *error) return 0;
         }
 
@@ -160,6 +160,26 @@ uint32_t asm32_sign_extend_16(uint32_t val)
         return val & 0x0000FFFF;
 }
 
+bool asm32_is_condition_true(asm32_t *const cpu, memory *mem, uint8_t Ra, uint8_t Rb, uint8_t Condition, bool *const error)
+{
+        int32_t left  = asm32_read_register(cpu, mem, Ra, error);
+        if (error && *error) return false;
+        int32_t right = asm32_read_register(cpu, mem, Rb, error);
+        if (error && *error) return false;
+        switch (Condition)
+        {
+                case 0: return left == right;
+                case 1: return left != right;
+                case 2: return left <  right;
+                case 3: return left >= right;
+                case 4: return left >  right;
+                case 5: return left <= right;
+                case 6: return (uint32_t)left > (uint32_t)right;
+                default:
+                case 7: return true;
+        }
+}
+
 void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
 {
         static const uint8_t required_bytes[16] = {1,1,3,3,4,2,1,1,2,2,2,2,2,2,2,5};
@@ -167,7 +187,7 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
         if (error && *error) return;
         const uint64_t instruction = asm32_read_instruction(cpu, mem, pc, error);
         if (error && *error) return;
-        asm32_write_word(cpu, mem, 0x0F, pc + required_bytes[instruction & 0x0F], error);
+        asm32_write_register(cpu, mem, 0x0F, pc + required_bytes[instruction & 0x0F], error);
 
         const uint8_t  Ra         = (instruction >>  4) & 0xF;
         const uint8_t  Rb         = (instruction >>  8) & 0xF;
@@ -176,8 +196,8 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
         const uint32_t I11        = asm32_sign_extend_11((instruction >>  8) & 0x07FF);
         const uint32_t I16        = asm32_sign_extend_16((instruction >> 16) & 0xFFFF);
         const uint32_t I32        = (instruction >>  8) & 0xFFFFFFFF;
-        const uint32_t Cond       = (instruction >>  8) & 0x07;
-        const uint32_t Link       = (instruction >> 12) & 0x01;
+        const uint32_t Cond       = (instruction >> 12) & 0x07;
+        const uint32_t Link       = (instruction >> 15) & 0x01;
         const uint8_t  Opcode     = instruction & 0xF;
         
         uint32_t Temp             = 0;
@@ -206,6 +226,47 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                 if (error && *error) return;
                 (WordOrByte) ? asm32_write_word(cpu, mem, (uint32_t)(*(int32_t *)&Base + *(int32_t *)&I11), Temp, error) :
                                asm32_write_byte(cpu, mem, (uint32_t)(*(int32_t *)&Base + *(int32_t *)&I11), Temp, error);
+                break;
+        case 0x4:       // Bxx
+                if (asm32_is_condition_true(cpu, mem, Ra, Rb, Cond, error))
+                {
+                        if (Link)
+                        {
+                                asm32_write_register(cpu, mem, 0x01, pc + required_bytes[instruction & 0x0F], error);
+                                if (error && *error) return;
+                        }
+
+                        const virtual new_pc = (pc & 0xF0000000) | ((uint32_t)((int32_t)(pc & 0x0FFFFFFF) + I16) & 0x0FFFFFFF);
+                        asm32_write_register(cpu, mem, 0x0F, new_pc, error);
+                }
+                break;
+        case 0x5:       // LNKXX
+                if (asm32_is_condition_true(cpu, mem, Ra, Rb, Cond, error))
+                {
+                        Temp = asm32_read_register(cpu, mem, 0x01, error);
+                        if (error && *error) return;
+                        asm32_write_register(cpu, mem, 0x0F, Temp, error);
+                }
+                break;
+        case 0x6:       // PUL
+                Temp = asm32_read_register(cpu, mem, 0x00, error);
+                if (error && *error) return;
+                Temp -= 4;
+                asm32_write_register(cpu, mem, 0x00, Temp, error);
+                if (error && *error) return;
+                Temp = asm32_read_word(cpu, mem, Temp, error);
+                if (error && *error) return;
+                asm32_write_register(cpu, mem, Ra, Temp, error);
+                break;
+        case 0x7:       // PUS
+                Temp = asm32_read_register(cpu, mem, 0x00, error);
+                if (error && *error) return;
+                Base = asm32_read_register(cpu, mem, Ra, error);
+                if (error && *error) return;
+                asm32_write_word(cpu, mem, Temp, Base, error);
+                if (error && *error) return;
+                Temp += 4;
+                asm32_write_register(cpu, mem, 0x00, Temp, error);
                 break;
         }
 }

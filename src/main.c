@@ -6,16 +6,22 @@
 
 uint8_t mm[8192] = {0};
 
-int main(void)
+int main(int argc, char **argv)
 {
-        bool error;
+        bool error, halt;
         asm32_t asm32 = {0};
         memory  mem = {0};
         memset(mm, 0, 8192);
         mem.len = 8192;
         mem.mem = &mm[0];
-        mm[0] = 0xEF; // LDI 14,
-        mm[1] = 0x0F; // 0x0F
+        if (argc == 2)
+        {
+                FILE *fp = fopen(argv[1], "r");
+                if (!fp) return -1;
+                fread(&mm[0], 1, 8192, fp);
+                fclose(fp);
+        }
+
         error = asm32_reset(&asm32,&mem);
         if (error)
         {
@@ -31,6 +37,12 @@ int main(void)
                         asm32_interrupt(&asm32, &mem, 0x00, &error);
                         break;
                 }
-        } while(0);
+
+                halt = asm32_read_register(&asm32, &mem, 0x0E, &error);
+                if (error)
+                {
+                        break;
+                }
+        } while(!halt);
         asm32_dump(&asm32, &mem, &error);
 }

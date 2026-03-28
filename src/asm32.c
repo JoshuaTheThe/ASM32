@@ -206,10 +206,10 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
         fprintf(stderr, "Sz: %.2x ", WordOrByte * 4);
         fprintf(stderr, "11: %.4x ", I11 & 0x07FF);
         fprintf(stderr, "16: %.4x ", I16 & 0xFFFF);
-        fprintf(stderr, "32: %.4x ", I32);
+        fprintf(stderr, "32: %.8x ", I32);
         fprintf(stderr, "CON:%.1x ", Cond);
         fprintf(stderr, "LNK:%.1x ", Link);
-        fprintf(stderr, "OPC:%.1x ", Opcode);
+        fprintf(stderr, "OPC:%.8x ", Opcode);
 
         uint32_t Temp=0,Temp2     = 0;
         uint32_t Base             = 0;

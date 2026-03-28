@@ -183,7 +183,7 @@ bool asm32_is_condition_true(asm32_t *const cpu, memory *mem, uint8_t Ra, uint8_
 void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
 {
         static const uint8_t required_bytes[16] = {1,1,3,3,4,2,1,1,2,2,2,2,2,2,2,5};
-        const virtual pc      = asm32_read_register(cpu, mem, 0x0F, error);
+        const virtual pc = asm32_read_register(cpu, mem, 0x0F, error);
         if (error && *error) return;
         const uint64_t instruction = asm32_read_instruction(cpu, mem, pc, error);
         if (error && *error) return;
@@ -193,23 +193,36 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
         const uint8_t  Rb         = (instruction >>  8) & 0xF;
         const uint8_t  Rc         = (instruction >> 12) & 0xF;
         const bool     WordOrByte = (instruction >> 19) & 0x01;
-        const uint32_t I11        = asm32_sign_extend_11((instruction >>  8) & 0x07FF);
+        const uint32_t I11        = asm32_sign_extend_11((instruction >> 9) & 0x07FF);
         const uint32_t I16        = asm32_sign_extend_16((instruction >> 16) & 0xFFFF);
         const uint32_t I32        = (instruction >>  8) & 0xFFFFFFFF;
         const uint32_t Cond       = (instruction >> 12) & 0x07;
         const uint32_t Link       = (instruction >> 15) & 0x01;
         const uint8_t  Opcode     = instruction & 0xF;
-        
-        uint32_t Temp             = 0;
+
+        fprintf(stderr, "Ra: %.2x ", Ra);
+        fprintf(stderr, "Rb: %.2x ", Rb);
+        fprintf(stderr, "Rc: %.2x ", Rc);
+        fprintf(stderr, "Sz: %.2x ", WordOrByte * 4);
+        fprintf(stderr, "11: %.4x ", I11 & 0x07FF);
+        fprintf(stderr, "16: %.4x ", I16 & 0xFFFF);
+        fprintf(stderr, "32: %.4x ", I32);
+        fprintf(stderr, "CON:%.1x ", Cond);
+        fprintf(stderr, "LNK:%.1x ", Link);
+        fprintf(stderr, "OPC:%.1x ", Opcode);
+
+        uint32_t Temp=0,Temp2     = 0;
         uint32_t Base             = 0;
 
         switch (Opcode)
         {
         case 0x00:      // CTX
                 asm32_write_register(cpu, mem, Ra, cpu->rp, error);
+                fprintf(stderr, "CTX\n");
                 break;
         case 0x01:      // CTS
                 cpu->rp = asm32_read_register(cpu, mem, Ra, error);
+                fprintf(stderr, "CTS\n");
                 break;
         case 0x2:       // LDW/LDB
                 Base = asm32_read_register(cpu, mem, Rb, error);
@@ -218,6 +231,7 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                                       asm32_read_byte(cpu, mem, (uint32_t)(*(int32_t *)&Base + *(int32_t *)&I11), error);
                 if (error && *error) return;
                 asm32_write_register(cpu, mem, Ra, Temp, error);
+                fprintf(stderr, "LDX\n");
                 break;
         case 0x3:       // STW/STB
                 Base = asm32_read_register(cpu, mem, Rb, error);
@@ -226,6 +240,7 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                 if (error && *error) return;
                 (WordOrByte) ? asm32_write_word(cpu, mem, (uint32_t)(*(int32_t *)&Base + *(int32_t *)&I11), Temp, error) :
                                asm32_write_byte(cpu, mem, (uint32_t)(*(int32_t *)&Base + *(int32_t *)&I11), Temp, error);
+                fprintf(stderr, "STX\n");
                 break;
         case 0x4:       // Bxx
                 if (asm32_is_condition_true(cpu, mem, Ra, Rb, Cond, error))
@@ -239,6 +254,7 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                         const virtual new_pc = (pc & 0xF0000000) | ((uint32_t)((int32_t)(pc & 0x0FFFFFFF) + I16) & 0x0FFFFFFF);
                         asm32_write_register(cpu, mem, 0x0F, new_pc, error);
                 }
+                fprintf(stderr, "BXX\n");
                 break;
         case 0x5:       // LNKXX
                 if (asm32_is_condition_true(cpu, mem, Ra, Rb, Cond, error))
@@ -247,6 +263,7 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                         if (error && *error) return;
                         asm32_write_register(cpu, mem, 0x0F, Temp, error);
                 }
+                fprintf(stderr, "LXX\n");
                 break;
         case 0x6:       // PUL
                 Temp = asm32_read_register(cpu, mem, 0x00, error);
@@ -257,6 +274,7 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                 Temp = asm32_read_word(cpu, mem, Temp, error);
                 if (error && *error) return;
                 asm32_write_register(cpu, mem, Ra, Temp, error);
+                fprintf(stderr, "PUL\n");
                 break;
         case 0x7:       // PUS
                 Temp = asm32_read_register(cpu, mem, 0x00, error);
@@ -267,22 +285,89 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                 if (error && *error) return;
                 Temp += 4;
                 asm32_write_register(cpu, mem, 0x00, Temp, error);
+                fprintf(stderr, "PUS\n");
                 break;
         case 0x8:       // ADD
+                Temp  = asm32_read_register(cpu, mem, Rb, error);
+                if (error && *error) return;
+                Temp2 = asm32_read_register(cpu, mem, Rc, error);
+                if (error && *error) return;
+                Temp  = Temp + Temp2;
+                asm32_write_register(cpu, mem, Ra, Temp, error);
+                fprintf(stderr, "ADD\n");
                 break;
         case 0x9:       // SUB
+                Temp  = asm32_read_register(cpu, mem, Rb, error);
+                if (error && *error) return;
+                Temp2 = asm32_read_register(cpu, mem, Rc, error);
+                if (error && *error) return;
+                Temp  = Temp - Temp2;
+                asm32_write_register(cpu, mem, Ra, Temp, error);
+                fprintf(stderr, "SUB\n");
                 break;
         case 0xA:       // XOR
+                Temp  = asm32_read_register(cpu, mem, Rb, error);
+                if (error && *error) return;
+                Temp2 = asm32_read_register(cpu, mem, Rc, error);
+                if (error && *error) return;
+                Temp  = Temp ^ Temp2;
+                asm32_write_register(cpu, mem, Ra, Temp, error);
+                fprintf(stderr, "XOR\n");
                 break;
         case 0xB:       // ORR
+                Temp  = asm32_read_register(cpu, mem, Rb, error);
+                if (error && *error) return;
+                Temp2 = asm32_read_register(cpu, mem, Rc, error);
+                if (error && *error) return;
+                Temp  = Temp | Temp2;
+                asm32_write_register(cpu, mem, Ra, Temp, error);
+                fprintf(stderr, "ORR\n");
                 break;
         case 0xC:       // AND
+                Temp  = asm32_read_register(cpu, mem, Rb, error);
+                if (error && *error) return;
+                Temp2 = asm32_read_register(cpu, mem, Rc, error);
+                if (error && *error) return;
+                Temp  = Temp & Temp2;
+                asm32_write_register(cpu, mem, Ra, Temp, error);
+                fprintf(stderr, "AND\n");
                 break;
         case 0xD:       // ROL
+                Temp  = asm32_read_register(cpu, mem, Rb, error);
+                if (error && *error) return;
+                Temp2 = asm32_read_register(cpu, mem, Rc, error);
+                if (error && *error) return;
+                Temp2 = Temp2 & 0x1F;
+                Temp  = (Temp << Temp2) | (Temp >> (32 - Temp2));
+                asm32_write_register(cpu, mem, Ra, Temp, error);
+                fprintf(stderr, "ROL\n");
                 break;
-        case 0xE:       // EXT
+        case 0xE:       // EX
+                fprintf(stderr, "EX\n");
                 break;
         case 0xF:       // LDI
+                fprintf(stderr, "LDI\n");
+                asm32_write_register(cpu, mem, Ra, I32, error);
                 break;
         }
+}
+
+void asm32_dump(asm32_t *const cpu, memory *mem, bool *const error)
+{
+        int i;
+        for (i = 0; i < 16; ++i)
+        {
+                uint32_t val = asm32_read_register(cpu, mem, i, error);
+                if (error && *error)
+                {
+                        printf("r%.2d: ???????? = ???????? ", i);
+                }
+                else
+                {
+                        printf("r%.2d: %.8x = %.8x ", i, lea_reg(cpu, i), val);
+                }
+                if ((i & 0x03) == 0x03)
+                        printf("\n");
+        }
+        printf("rp: %.8x\n", cpu->rp);
 }

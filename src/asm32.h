@@ -7,7 +7,7 @@
 #include<stdint.h>
 #include<stdbool.h>
 
-#define lea_reg(cpu,idx) ((cpu)->rp + (idx * 4))
+#define lea_reg(cpu,idx) ((cpu)->rp + ((uint32_t)(idx) * 4))
 #define seg_off(seg,off) (((seg) << 28) | (off))
 
 typedef uint32_t virtual;
@@ -43,5 +43,6 @@ bool     asm32_reset(asm32_t *const cpu, memory *mem);
 void     asm32_execute(asm32_t *const cpu, memory *mem, bool *const error);
 uint32_t asm32_read_register(asm32_t *const cpu, memory *mem, uint8_t index, bool *const error);
 uint32_t asm32_write_register(asm32_t *const cpu, memory *mem, uint8_t index, uint32_t value, bool *const error);
+void     asm32_dump(asm32_t *const cpu, memory *mem, bool *const error);
 
 #endif

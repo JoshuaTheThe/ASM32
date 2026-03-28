@@ -27,6 +27,7 @@ typedef struct
 {
         asm32_segment_t seg[16];
         uint32_t rp;
+        bool halt;
 } asm32_t;
 
 bool     asm32_is_user_program(asm32_t const *const cpu, memory *mem, bool *const error);

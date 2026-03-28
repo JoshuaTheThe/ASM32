@@ -8,7 +8,7 @@ uint8_t mm[8192] = {0};
 
 int main(int argc, char **argv)
 {
-        bool error, halt;
+        bool error;
         asm32_t asm32 = {0};
         memory  mem = {0};
         memset(mm, 0, 8192);
@@ -37,12 +37,6 @@ int main(int argc, char **argv)
                         asm32_interrupt(&asm32, &mem, 0x00, &error);
                         break;
                 }
-
-                halt = asm32_read_register(&asm32, &mem, 0x0E, &error);
-                if (error)
-                {
-                        break;
-                }
-        } while(!halt);
+        } while(!asm32.halt);
         asm32_dump(&asm32, &mem, &error);
 }

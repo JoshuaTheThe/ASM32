@@ -227,6 +227,10 @@ macro LDI ra, i {
         dd i
 }
 
+macro HLT {
+        db $0E, $00
+}
+
 ; pseudo-instructions
 macro LDR ra, rb {
         ORR ra, rb, rb

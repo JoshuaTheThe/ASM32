@@ -6,6 +6,4 @@ _start: XOR     $04, $04, $04
 lp:     ADD     $05,$05,$02
         SUB     $03,$03,$02
         BGRE    $03,$04,lp
-        ; emulator halts on $0E being anything currently
-        ; weird hack, but it works
-        LDR     $0E,$02
+        HLT

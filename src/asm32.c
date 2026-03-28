@@ -343,7 +343,8 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                 fprintf(stderr, "ROL\n");
                 break;
         case 0xE:       // EX
-                fprintf(stderr, "EX\n");
+                fprintf(stderr, "EX,HLT\n");
+                cpu->halt = true;
                 break;
         case 0xF:       // LDI
                 fprintf(stderr, "LDI\n");

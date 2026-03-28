@@ -9,4 +9,6 @@ PROCEDURE _foo
         LDI     $02,$1
         STW     $02,$00,j
         LDW     $02,$00,j
+        DESTROY i
+        DESTROY j
         LEAVE

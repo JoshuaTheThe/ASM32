@@ -235,3 +235,32 @@ macro HLT {
 macro LDR ra, rb {
         ORR ra, rb, rb
 }
+
+macro ENTER {
+        LDI     $0D, $40
+        AND     $0C, $00, $00
+        ADD     $00, $00, $0D
+        ;       set new sp
+        STW     $00, $0C, $00
+        ;       set new pc = body
+        LDI     $0D, .body
+        STW     $0D, $0C, $3C
+        ;       set parent window
+        CTX     $0D
+        STW     $0D, $0C, $38
+        ;       clone arguments
+        STW     $03, $0C, ($4 * $3)
+        STW     $04, $0C, ($4 * $4)
+        STW     $05, $0C, ($4 * $5)
+        STW     $06, $0C, ($4 * $6)
+        ;       switch
+        CTS     $0C
+        LNK     $00,$00
+.body:
+}
+
+macro LEAVE {
+        ;       save result
+        STW     $02, $0E, $08
+        CTS     $0E
+}

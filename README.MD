@@ -9,10 +9,12 @@
 | - | - | - | - |
 | `R0` | note: Stack Pointer | 32 | Callee |
 | `R1` | note: Link Register | 32 | Callee |
-| `R2` | note: By Convention, return value | 32 | Caller |
-| `R3-R7` | note: By Convention, Argument | 32 | Caller |
-| `R8-R13` | note: By Convention, Scratch | 32 | Caller |
-| `R14` | note: By Convention, Data Pointer | 32 | Caller |
+| `R2` | note: By Convention, return value | 32 | Callee |
+| `R3-R6` | note: By Convention, Argument | 32 | Callee |
+| `R7-R11` | note: By Convention, Scratch | 32 | Callee |
+| `R12` | note: By Convention, Scratch window | 32 | Callee |
+| `R13` | note: By Convention, Scratch window | 32 | Callee |
+| `R14` | note: By Convention, Old Window | 32 | Callee |
 | `R15` | note: Program Counter | 32 | Caller |
 | `R[0-15]` | Register File Entry | 32 |
 | `RP` | Register File Pointer | 32 |

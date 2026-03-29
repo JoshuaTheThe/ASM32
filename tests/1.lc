@@ -5,6 +5,7 @@ end;
 
 procedure main [c: integer; v: ^char]
 begin
-        ^v;
-        return foo [69; 68];
+        define a: integer;
+        set [a; foo [8; 8]];
+        return a;
 end;

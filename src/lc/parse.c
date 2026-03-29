@@ -233,6 +233,50 @@ static void lc_stmt(FILE *fp)
                         int top = lc_pop();
                         printf("\t\tORR   $02, $%.2x, $%.2x\n\t\tLEAVE\n",top,top);
                         break;
+                case TOKEN_SET:
+                        lc_next(fp);
+                        {
+                                assert(lc_next(fp).type == TOKEN_LBRACKET && "syntax error");
+                                token name = lc_next(fp);
+                                assert(name.type == TOKEN_SYMBOL && "syntax error");
+                                assert(lc_next(fp).type == TOKEN_SEMICOLON && "syntax error");
+                                lc_expr(fp);
+                                assert(lc_next(fp).type == TOKEN_RBRACKET && "syntax error");
+                                int reg = lc_pop();
+                                int idx = lc_find(name.identifier);
+                                printf("\t\tST%c   $%.2x, $07, $%.4x\n", symbols[idx].as.variable.basetype == TYPE_INTEGER ||
+                                        symbols[idx].as.variable.ptrdepth > 0 ? 'W' : 'B', reg, symbols[idx].as.variable.offset);
+                                
+                                lc_free_register(reg);
+                        }
+                        break;
+                case TOKEN_DEFINE:
+                        lc_next(fp);
+                        {
+                                int ptr_depth = 0;
+                                token name = lc_next(fp), type = {0};
+                                assert(name.type == TOKEN_SYMBOL && "syntax error");
+                                assert(lc_next(fp).type == TOKEN_COLON && "syntax error");
+                                while (lc_peek(fp).type == TOKEN_CAR)
+                                {
+                                        ++ptr_depth;
+                                        lc_next(fp);
+                                }
+                                type = lc_next(fp);
+                                assert((type.type == TOKEN_INT || type.type == TOKEN_CHAR) && "syntax error");
+                                int idx = lc_allocate();
+                                symbols[idx].as.variable.basetype = type.type == TOKEN_INT ? TYPE_INTEGER : TYPE_CHAR;
+                                symbols[idx].as.variable.function = current_function;
+                                symbols[idx].as.variable.ptrdepth = ptr_depth;
+                                symbols[idx].as.variable.offset   = current_function_offset;
+                                current_function_offset += 4;
+                                memcpy(symbols[idx].identifier, name.identifier, MAX_IDENTIFIER);
+                                int reg = lc_allocate_register(TYPE_INTEGER, 0);
+                                printf("\t\tLDI   $%.2x, $00000000\n", reg);
+                                printf("\t\tPUS   $%.2x\n", reg);
+                                lc_free_register(reg);
+                        }
+                        break;
                 default:
                         lc_expr(fp);
                         break;

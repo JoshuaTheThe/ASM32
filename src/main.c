@@ -7,7 +7,7 @@
 
 uint8_t mm[8192] = {0};
 
-int main(int argc, char **argv)
+int emulate(int argc, char **argv)
 {
         bool error;
         asm32_t asm32 = {0};
@@ -15,9 +15,9 @@ int main(int argc, char **argv)
         memset(mm, 0, 8192);
         mem.len = 8192;
         mem.mem = &mm[0];
-        if (argc == 2)
+        if (argc == 3)
         {
-                FILE *fp = fopen(argv[1], "r");
+                FILE *fp = fopen(argv[2], "r");
                 if (!fp) return -1;
                 fread(&mm[0], 1, 8192, fp);
                 fclose(fp);
@@ -40,4 +40,11 @@ int main(int argc, char **argv)
                         break;
                 }
         } while(!asm32.halt);
+        return 0;
+}
+
+int main(int argc, char **argv)
+{
+        if (argc >= 2 && !strncmp(argv[1], "-r", 256))
+                return emulate(argc, argv);
 }

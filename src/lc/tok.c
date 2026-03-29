@@ -36,6 +36,7 @@ token next(FILE *fp)
                 case '+': tok.type = TOKEN_ADD; return tok;
                 case '-': tok.type = TOKEN_SUB; return tok;
                 case '^': tok.type = TOKEN_CAR; return tok;
+                case '=': tok.type = TOKEN_EQUAL; return tok;
                 case '<': tok.type = TOKEN_LESS; return tok;
                 case '>': tok.type = TOKEN_GREATER; return tok;
                 case '[': tok.type = TOKEN_LBRACKET; return tok;

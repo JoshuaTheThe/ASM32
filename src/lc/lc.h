@@ -17,6 +17,7 @@ enum
         TOKEN_ADD,
         TOKEN_SUB,
         TOKEN_CAR,
+        TOKEN_EQUAL,
         TOKEN_LESS,
         TOKEN_GREATER,
         TOKEN_LBRACKET,

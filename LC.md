@@ -1,4 +1,5 @@
 # simple language
+- called just lc
 
 ```pascal
 PROCEDURE Secondary [a:Integer; b:Integer]

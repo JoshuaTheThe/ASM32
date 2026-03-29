@@ -1,3 +1,13 @@
-procedure Main [c: Integer; v ^^Char]
+procedure secondary [a:integer; b:integer]
 begin
-end
+        [a + b];
+end;
+
+procedure main [c:integer; v:^^char]
+begin
+        define a:integer;
+        define b:integer;
+        set [a; 65];
+        set [b; 64];
+        secondary [a; b];
+end;

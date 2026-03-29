@@ -82,7 +82,7 @@ static void lc_primary(FILE *fp)
                                 if (symbols[idx].isfunction)
                                 {
                                         lc_primary(fp);
-                                        for (int dest = 7 - last_register_ptr; dest > 2 && last_register_ptr > 1; --dest)
+                                        for (int dest = 6 - last_register_ptr; dest > 2 && last_register_ptr > 0; --dest)
                                         {
                                                 int top = lc_pop();
                                                 printf("\t\tORR   $%.2x, $%.2x, $%.2x\n", dest, top, top);
@@ -224,7 +224,7 @@ static void lc_stmt(FILE *fp)
                         lc_expr(fp);
                         lc_free_register(lc_top(0));
                         int top = lc_pop();
-                        printf("\t\tORR   $02, $%.2x, $%.2x\n\t\tB     $00, $00, .exit\n",top,top);
+                        printf("\t\tORR   $02, $%.2x, $%.2x\n\t\tLEAVE\n",top,top);
                         break;
                 default:
                         lc_expr(fp);
@@ -300,5 +300,6 @@ void lc_program(FILE *fp)
                         assert(0 && "syntax error");
                 }
         } while (tok.type != TOKEN_EOF);
+        printf("\t\ttimes 4096 - ($ - $$) db 0\n");
         printf("_stack:\n");
 }

@@ -1,4 +1,9 @@
+procedure foo [a: integer; b: integer]
+begin
+        return a + b;
+end;
+
 procedure main []
 begin
-        return 8 + 8;
+        return foo [69; 68];
 end;

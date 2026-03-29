@@ -228,10 +228,10 @@ static void lc_stmt(FILE *fp)
                         break;
                 default:
                         lc_expr(fp);
-                        while (last_register_ptr > 0)
-                                lc_free_register(lc_pop());
                         break;
         }
+        while (last_register_ptr > 0)
+                lc_free_register(lc_pop());
         assert(lc_next(fp).type == TOKEN_SEMICOLON && "syntax error");
 }
 

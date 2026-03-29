@@ -3,6 +3,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include<asm32.h>
+#include<lc/lc.h>
 
 uint8_t mm[8192] = {0};
 

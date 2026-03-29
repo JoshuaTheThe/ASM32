@@ -1,0 +1,11 @@
+procedure putchar [chr: char]
+begin
+        define put_adr: ^char;
+        set [put_adr; 8192-4];
+        set [^put_adr; chr];
+end;
+
+procedure main []
+begin
+        putchar [^["Hello, World!\n" + 1]];        
+end;

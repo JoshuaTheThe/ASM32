@@ -89,7 +89,7 @@ static void lc_primary(FILE *fp)
         {
                 case TOKEN_STRING:
                         {
-                                int r = lc_allocate_register(TYPE_INTEGER, 0);
+                                int r = lc_allocate_register(TYPE_CHAR, 1);
                                 printf("\t\tLDI   $%.2x, __STR%.8x\n", r, string_cnt);
                                 lc_create_string(tok.identifier);
                         }
@@ -100,10 +100,11 @@ static void lc_primary(FILE *fp)
                                 if (symbols[idx].isfunction)
                                 {
                                         lc_primary(fp);
-                                        for (int dest = 6 - last_register_ptr; dest > 2 && last_register_ptr > 0; --dest)
+                                        for (int dest = 3 + last_register_ptr - 1; dest >= 3 && last_register_ptr > 0; --dest)
                                         {
                                                 int top = lc_pop();
                                                 printf("\t\tORR   $%.2x, $%.2x, $%.2x\n", dest, top, top);
+                                                last_register_ptr--;
                                         }
                                         printf("\t\tBL    $00, $00, _%s\n", tok.identifier);
                                         while (last_register_ptr > 0)
@@ -225,15 +226,36 @@ static void lc_stmt(FILE *fp)
         switch (tok.type)
         {
                 case TOKEN_IF:
+                {
                         lc_next(fp);
                         lc_expr(fp);
-                        lc_free_register(lc_top(0));
+                        int reg = lc_pop();
+                        int zero = lc_allocate_register(TYPE_INTEGER, 0);
+                        
+                        static int label = 0;
+                        int my_label = label++;
+                        
+                        printf("\t\tLDI   $%.2x, $00000000", zero);
+                        printf("\t\tBEQ   $%.2x, $%.2x, .Lelse%.8x\n", reg, zero, my_label);
+                        lc_free_register(reg);
+                        lc_free_register(zero);
+                        
                         lc_stmt(fp);
+                        
                         if (lc_peek(fp).type == TOKEN_ELSE)
                         {
                                 lc_next(fp);
+                                printf("\t\tB     $00, $00, .Lend%.8x\n", my_label);
+                                printf(".Lelse%.8x:\n", my_label);
+                                lc_stmt(fp);
+                                printf(".Lend%.8x:\n", my_label);
+                        }
+                        else
+                        {
+                                printf(".Lelse%.8x:\n", my_label);
                         }
                         break;
+                }
                 case TOKEN_BEGIN:
                         lc_next(fp);
                         while (lc_peek(fp).type != TOKEN_END)
@@ -248,9 +270,16 @@ static void lc_stmt(FILE *fp)
                         printf("\t\tORR   $02, $%.2x, $%.2x\n\t\tLEAVE\n",top,top);
                         break;
                 case TOKEN_SET:
-                        lc_next(fp);
                         {
+                                lc_next(fp);
                                 assert(lc_next(fp).type == TOKEN_LBRACKET && "syntax error");
+                                int deref = 0;
+                                while (lc_peek(fp).type == TOKEN_CAR)
+                                {
+                                        ++deref;
+                                        lc_next(fp);
+                                }
+                                
                                 token name = lc_next(fp);
                                 assert(name.type == TOKEN_SYMBOL && "syntax error");
                                 assert(lc_next(fp).type == TOKEN_SEMICOLON && "syntax error");
@@ -258,8 +287,26 @@ static void lc_stmt(FILE *fp)
                                 assert(lc_next(fp).type == TOKEN_RBRACKET && "syntax error");
                                 int reg = lc_pop();
                                 int idx = lc_find(name.identifier);
-                                printf("\t\tST%c   $%.2x, $07, $%.4x\n", symbols[idx].as.variable.basetype == TYPE_INTEGER ||
-                                        symbols[idx].as.variable.ptrdepth > 0 ? 'W' : 'B', reg, symbols[idx].as.variable.offset);
+                                if (deref == 0)
+                                {
+                                        printf("\t\tST%c   $%.2x, $07, $%.4x\n",
+                                                symbols[idx].as.variable.basetype == TYPE_INTEGER ||
+                                                symbols[idx].as.variable.ptrdepth > 0 ? 'W' : 'B',
+                                                reg, symbols[idx].as.variable.offset);
+                                }
+                                else
+                                {
+                                        int ptr = lc_allocate_register(symbols[idx].as.variable.basetype, symbols[idx].as.variable.ptrdepth - deref);
+                                        printf("\t\tLDW   $%.2x, $07, $%.4x\n",
+                                                ptr, symbols[idx].as.variable.offset);
+                                        for (int i = 1; i < deref; i++)
+                                                printf("\t\tLDW   $%.2x, $%.2x, $0000\n", ptr, ptr);
+                                        printf("\t\tST%c   $%.2x, $%.2x, $0000\n",
+                                                symbols[idx].as.variable.ptrdepth - deref == 0 &&
+                                                symbols[idx].as.variable.basetype == TYPE_CHAR ? 'B' : 'W',
+                                                reg, ptr);
+                                        lc_free_register(ptr);
+                                }
                                 
                                 lc_free_register(reg);
                         }

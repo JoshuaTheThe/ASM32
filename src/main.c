@@ -39,6 +39,13 @@ int emulate(int argc, char **argv)
                         asm32_interrupt(&asm32, &mem, 0x00, &error);
                         break;
                 }
+
+                if (mem.mem[8192-4])
+                {
+                        printf("%c",mem.mem[8192-4]);
+                        fflush(stdout);
+                        mem.mem[8192-4] = 0;
+                }
         } while(!asm32.halt);
         return 0;
 }

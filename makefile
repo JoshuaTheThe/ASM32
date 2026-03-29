@@ -85,6 +85,12 @@ clean:
 run: all
 	./bin/$(OUTPUT)
 
+.PHONY: test
+test:
+	./bin/$(OUTPUT) -c tests/hello.lc > tests/hello.s
+	fasm tests/hello.s
+	./bin/$(OUTPUT) -r tests/hello.bin 2> log.~
+
 .PHONY: debug
 debug: CXXFLAGS += -O0 -ggdb3
 debug: all

@@ -17,7 +17,6 @@ BEGIN
 END;
 ```
 
-- no operator precedence
 - all statements end in seperator
 - only one seperator, the semi colon
 - if the symbol is a procedure, call it with the args;

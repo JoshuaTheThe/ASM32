@@ -260,11 +260,16 @@ macro ENTER space {
         PUL     $0D
         PUL     $0C
         LNK     $00,$00
-.body:
+.body:  ORR     $07,$00,$00
+        ;       push args
+        PUS     $03
+        PUS     $04
+        PUS     $05
+        PUS     $06
 }
 
 macro LEAVE {
-        ;       save result
+.exit:  ;       save result
         STW     $02, $0E, $08
         CTS     $0E
 }

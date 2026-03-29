@@ -11,7 +11,8 @@
 | `R1` | note: Link Register | 32 | Callee |
 | `R2` | note: By Convention, return value | 32 | Callee |
 | `R3-R6` | note: By Convention, Argument | 32 | Callee |
-| `R7-R13` | note: By Convention, Scratch | 32 | Callee |
+| `R7` | note: By Convention, Data Pointer | 32 | Callee |
+| `R8-R13` | note: By Convention, Scratch | 32 | Callee |
 | `R14` | note: By Convention, Old Window | 32 | Callee |
 | `R15` | note: Program Counter | 32 | Caller |
 | `R[0-15]` | Register File Entry | 32 |

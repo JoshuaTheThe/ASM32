@@ -1,7 +1,7 @@
 
 #include <lc/lc.h>
 
-char *keyword = "\002IF\004ELSE\005WHILE\005BEGIN\003END\011PROCEDURE\006DEFINE\003SET\003AND\003XOR\002OR\007INTEGER\004CHAR";
+char *keyword = "\002IF\004ELSE\005WHILE\005BEGIN\003END\011PROCEDURE\006DEFINE\003SET\003AND\003XOR\002OR\007INTEGER\004CHAR\006RETURN";
 
 static token lookahead = {0};
 static bool  has_lookahead = false;
@@ -79,10 +79,13 @@ token lc_next(FILE *fp)
         if (has_lookahead)
         {
                 has_lookahead = false;
-                return lookahead;            
+                //printf("tk: type=%d, '%s', %d\n", lookahead.type, lookahead.identifier, lookahead.num);
+                return lookahead;
         }
 
-        return lc_actual_next(fp);
+        token tok = lc_actual_next(fp);
+        //printf("tk: type=%d, '%s', %d\n", tok.type, tok.identifier, tok.num);
+        return tok;
 }
 
 void lc_unget(token tok)

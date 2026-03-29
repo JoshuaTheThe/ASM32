@@ -42,7 +42,14 @@ enum
         TOKEN_OR,
         TOKEN_INT,
         TOKEN_CHAR,
+        TOKEN_RETURN,
         __END_OF_KEYWORDS,
+};
+
+enum
+{
+        TYPE_INTEGER,
+        TYPE_CHAR,
 };
 
 typedef struct
@@ -57,7 +64,13 @@ typedef struct
                         int argument_count;
                 } function;
 
-                int variable; // offset
+                struct
+                {
+                        int offset;
+                        int basetype;
+                        int ptrdepth;
+                        int function;
+                } variable;
         } as;
 } symbol;
 

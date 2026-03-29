@@ -3,7 +3,7 @@
 
 char *keyword = "\002IF\004ELSE\005WHILE\005BEGIN\003END\011PROCEDURE\006DEFINE\003SET\003AND\003XOR\002OR\003INT\004CHAR";
 
-int identifier(token *tok)
+int lc_identifier(token *tok)
 {
         char *p = keyword;
         for (int i = 0; i < __END_OF_KEYWORDS; ++i)
@@ -20,7 +20,7 @@ int identifier(token *tok)
         return TOKEN_SYMBOL;
 }
 
-token next(FILE *fp)
+token lc_next(FILE *fp)
 {
         char x;
         do
@@ -65,7 +65,7 @@ token next(FILE *fp)
                         x = fgetc(fp);
                         if (tok.num >= 64) break;
                 }
-                tok.type = identifier(&tok);
+                tok.type = lc_identifier(&tok);
                 ungetc(x, fp);
         }
         return tok;

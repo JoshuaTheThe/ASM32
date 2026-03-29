@@ -47,4 +47,11 @@ int main(int argc, char **argv)
 {
         if (argc >= 2 && !strncmp(argv[1], "-r", 256))
                 return emulate(argc, argv);
+        else if (argc >= 3 && !strncmp(argv[1], "-a", 256))
+        {
+                FILE *fin = fopen(argv[2], "r");
+                if (!fin) return -1;
+                lc_next(fin);
+                fclose(fin);
+        }
 }

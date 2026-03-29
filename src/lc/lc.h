@@ -47,6 +47,6 @@ typedef struct
         int type,num;
 } token;
 
-token next(FILE *fp);
+token lc_next(FILE *fp);
 
 #endif

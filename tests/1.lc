@@ -3,7 +3,8 @@ begin
         return a + b;
 end;
 
-procedure main []
+procedure main [c: integer; v: ^char]
 begin
+        ^v;
         return foo [69; 68];
 end;

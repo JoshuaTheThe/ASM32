@@ -10,6 +10,8 @@ _FOO:		ENTER $04
 		LEAVE
 		LEAVE
 _MAIN:		ENTER $04
+		LDW   $08, $07, $0004
+		LDB   $08, $08, $00
 		LDI   $08, $00000045
 		LDI   $09, $00000044
 		ORR   $04, $09, $09

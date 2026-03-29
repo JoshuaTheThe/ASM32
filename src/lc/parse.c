@@ -3,16 +3,20 @@
 
 symbol symbols[MAX_SYMBOLS] = {0};
 bool registers[16] = {0};
+int register_base_types[16] = {0};
+int register_ptr_depth[16] = {0};
 int last_register[16] = {0}, last_register_ptr = 1;
 int current_function = -1;
 int current_function_offset = 0;
 
-static int lc_allocate_register(void)
+static int lc_allocate_register(int type, int depth)
 {
         for (int i = 8; i < 14; ++i)
                 if (!registers[i]) 
                 {
                         registers[i] = true;
+                        register_base_types[i] = type;
+                        register_ptr_depth[i] = depth;
                         last_register[last_register_ptr++] = i;
                         return i;
                 }
@@ -90,12 +94,12 @@ static void lc_primary(FILE *fp)
                                         printf("\t\tBL    $00, $00, _%s\n", tok.identifier);
                                         while (last_register_ptr > 0)
                                                 lc_free_register(lc_pop());
-                                        int r = lc_allocate_register();
+                                        int r = lc_allocate_register(TYPE_INTEGER, 0);
                                         printf("\t\tORR   $%.2x, $02, $02\n", r);
                                 }
                                 else
                                 {
-                                        int r = lc_allocate_register();
+                                        int r = lc_allocate_register(symbols[idx].as.variable.basetype, symbols[idx].as.variable.ptrdepth);
                                         printf("\t\tLD%c   $%.2x, $07, $%.4x\n", symbols[idx].as.variable.basetype == TYPE_INTEGER ||
                                                                                symbols[idx].as.variable.ptrdepth > 0 ? 'W' : 'B', r, symbols[idx].as.variable.offset);
                                 }
@@ -103,7 +107,7 @@ static void lc_primary(FILE *fp)
                         }
                 case TOKEN_NUMBER:
                         {
-                                int i = lc_allocate_register();
+                                int i = lc_allocate_register(TYPE_INTEGER, 0);
                                 printf("\t\tLDI   $%.2x, $%.8x\n", i, tok.num);
                         }
                         break;
@@ -135,7 +139,10 @@ static void lc_prefix(FILE *fp)
         int adr = lc_top(0);
         for (int i = 0; i < deref_len; ++i)
         {
-                printf("\t\tLDW   $%.2x, $%.2x, $00\n",adr,adr);
+                printf("\t\tLD%c   $%.2x, $%.2x, $00\n",
+                        register_base_types[adr] == TYPE_INTEGER ||
+                        (register_ptr_depth[adr] - i) > 1 ? 'W' : 'B',
+                        adr,adr);
         }
 }
 

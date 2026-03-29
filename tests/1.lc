@@ -1,9 +1,4 @@
-procedure foo [a:integer; b:integer]
-begin
-        return a + b;
-end;
-
 procedure main []
 begin
-        return foo [1; 2];
+        return 8 + 8;
 end;

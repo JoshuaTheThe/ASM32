@@ -82,21 +82,21 @@ static void lc_primary(FILE *fp)
                                 if (symbols[idx].isfunction)
                                 {
                                         lc_primary(fp);
-                                        for (int dest = 6; dest > 2 && last_register_ptr > 0; --dest)
+                                        for (int dest = 7 - last_register_ptr; dest > 2 && last_register_ptr > 1; --dest)
                                         {
                                                 int top = lc_pop();
-                                                printf("\t\tORR   $%.2x,$%.2x,$%.2x\n", dest, top, top);
+                                                printf("\t\tORR   $%.2x, $%.2x, $%.2x\n", dest, top, top);
                                         }
-                                        printf("\t\tBL    %s\n", tok.identifier);
+                                        printf("\t\tBL    $00, $00, _%s\n", tok.identifier);
                                         while (last_register_ptr > 0)
                                                 lc_free_register(lc_pop());
                                         int r = lc_allocate_register();
-                                        printf("\t\tORR   $%.2x,$02,$02\n", r);
+                                        printf("\t\tORR   $%.2x, $02, $02\n", r);
                                 }
                                 else
                                 {
                                         int r = lc_allocate_register();
-                                        printf("\t\tLD%c   $%.2x,$07,$%.4x\n", symbols[idx].as.variable.basetype == TYPE_INTEGER ||
+                                        printf("\t\tLD%c   $%.2x, $07, $%.4x\n", symbols[idx].as.variable.basetype == TYPE_INTEGER ||
                                                                                symbols[idx].as.variable.ptrdepth > 0 ? 'W' : 'B', r, symbols[idx].as.variable.offset);
                                 }
                                 break;
@@ -104,7 +104,7 @@ static void lc_primary(FILE *fp)
                 case TOKEN_NUMBER:
                         {
                                 int i = lc_allocate_register();
-                                printf("\t\tLDI   $%.2x,$%.8x\n", i, tok.num);
+                                printf("\t\tLDI   $%.2x, $%.8x\n", i, tok.num);
                         }
                         break;
                 case TOKEN_LBRACKET:
@@ -135,7 +135,7 @@ static void lc_prefix(FILE *fp)
         int adr = lc_top(0);
         for (int i = 0; i < deref_len; ++i)
         {
-                printf("\t\tLDW   $%.2x,$%.2x,$00\n",adr,adr);
+                printf("\t\tLDW   $%.2x, $%.2x, $00\n",adr,adr);
         }
 }
 
@@ -149,9 +149,9 @@ static void lc_add(FILE *fp)
                 int rgt = lc_pop();
                 int lft = lc_top(0);
                 if (type == TOKEN_ADD)
-                        printf("\t\tADD   $%.2x,$%.2x,$%.2x\n",lft,lft,rgt);
+                        printf("\t\tADD   $%.2x, $%.2x, $%.2x\n",lft,lft,rgt);
                 else
-                        printf("\t\tSUB   $%.2x,$%.2x,$%.2x\n",lft,lft,rgt);
+                        printf("\t\tSUB   $%.2x, $%.2x, $%.2x\n",lft,lft,rgt);
                 lc_free_register(rgt);
         }
 }
@@ -165,7 +165,7 @@ static void lc_and(FILE *fp)
                 lc_add(fp);
                 int rgt = lc_pop();
                 int lft = lc_top(0);
-                printf("\t\tAND   $%.2x,$%.2x,$%.2x\n",lft,lft,rgt);
+                printf("\t\tAND   $%.2x, $%.2x, $%.2x\n",lft,lft,rgt);
                 lc_free_register(rgt);
         }
 }
@@ -179,7 +179,7 @@ static void lc_xor(FILE *fp)
                 lc_and(fp);
                 int rgt = lc_pop();
                 int lft = lc_top(0);
-                printf("\t\tXOR   $%.2x,$%.2x,$%.2x\n",lft,lft,rgt);
+                printf("\t\tXOR   $%.2x, $%.2x, $%.2x\n",lft,lft,rgt);
                 lc_free_register(rgt);
         }
 }
@@ -193,7 +193,7 @@ static void lc_expr(FILE *fp)
                 lc_xor(fp);
                 int rgt = lc_pop();
                 int lft = lc_top(0);
-                printf("\t\tORR   $%.2x,$%.2x,$%.2x\n",lft,lft,rgt);
+                printf("\t\tORR   $%.2x, $%.2x, $%.2x\n",lft,lft,rgt);
                 lc_free_register(rgt);
         }
 }
@@ -224,7 +224,7 @@ static void lc_stmt(FILE *fp)
                         lc_expr(fp);
                         lc_free_register(lc_top(0));
                         int top = lc_pop();
-                        printf("\t\tORR   $02,$%.2x,$%.2x\n\t\tB     $00,$00,.exit\n",top,top);
+                        printf("\t\tORR   $02, $%.2x, $%.2x\n\t\tB     $00, $00, .exit\n",top,top);
                         break;
                 default:
                         lc_expr(fp);
@@ -240,7 +240,7 @@ static void lc_procedure(FILE *fp)
         int me = lc_allocate();
         token name = lc_next(fp), type = {0};
         assert(name.type == TOKEN_SYMBOL && "syntax error");
-        printf("_%.*s:\t\tENTER $00\n",name.num,name.identifier);
+        printf("_%.*s:\t\tENTER $04\n",name.num,name.identifier);
         assert(lc_next(fp).type == TOKEN_LBRACKET && "syntax error");
         symbols[me].isfunction = true;
         memcpy(symbols[me].identifier, name.identifier, MAX_IDENTIFIER);
@@ -284,6 +284,10 @@ static void lc_procedure(FILE *fp)
 void lc_program(FILE *fp)
 {
         token tok;
+        printf("\t\tinclude \"macros.s\"\n");
+        printf("_start:\t\tLDI   $00, _stack\n");
+        printf("\t\tBL    $00, $00, _MAIN\n");
+        printf("\t\tHLT\n");
         do
         {
                 tok = lc_next(fp);
@@ -296,4 +300,5 @@ void lc_program(FILE *fp)
                         assert(0 && "syntax error");
                 }
         } while (tok.type != TOKEN_EOF);
+        printf("_stack:\n");
 }

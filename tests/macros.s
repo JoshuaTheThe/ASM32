@@ -41,98 +41,98 @@ macro STB ra, rb, i {
 macro B ra, rb, i {
         db $04 or (ra shl 4)
         db rb  or (7 shl 4)
-        dw (i-$+2) and $FFFF
+        dw (i-($-2)) and $FFFF
 }
 
 macro BEQ ra, rb, i {
         db $04 or (ra shl 4)
         db rb  or (0 shl 4)
-        dw (i - $ + 2) and $FFFF
+        dw (i - ($ - 2)) and $FFFF
 }
 
 macro BNEQ ra, rb, i {
         db $04 or (ra shl 4)
         db rb  or (1 shl 4)
-        dw (i - $ + 2) and $FFFF
+        dw (i - ($ - 2)) and $FFFF
 }
 
 macro BLES ra, rb, i {
         db $04 or (ra shl 4)
         db rb  or (2 shl 4)
-        dw (i - $ + 2) and $FFFF
+        dw (i - ($ - 2)) and $FFFF
 }
 
 macro BGREEQ ra, rb, i {
         db $04 or (ra shl 4)
         db rb  or (3 shl 4)
-        dw (i - $ + 2) and $FFFF
+        dw (i - ($ - 2)) and $FFFF
 }
 
 macro BGRE ra, rb, i {
         db $04 or (ra shl 4)
         db rb  or (4 shl 4)
-        dw (i - $ + 2) and $FFFF
+        dw (i - ($ - 2)) and $FFFF
 }
 
 macro BLESEQ ra, rb, i {
         db $04 or (ra shl 4)
         db rb  or (5 shl 4)
-        dw (i - $ + 2) and $FFFF
+        dw (i - ($ - 2)) and $FFFF
 }
 
 macro BABOVE ra, rb, i {
         db $04 or (ra shl 4)
         db rb  or (6 shl 4)
-        dw (i - $ + 2) and $FFFF
+        dw (i - ($ - 2)) and $FFFF
 }
 
 ; linked variants
 macro BL ra, rb, i {
         db $04 or (ra shl 4)
         db rb  or (7 shl 4) or $80
-        dw (i - $ + 2) and $FFFF
+        dw (i - ($ - 2)) and $FFFF
 }
 
 macro BLEQ ra, rb, i {
         db $04 or (ra shl 4)
         db rb  or (0 shl 4) or $80
-        dw (i - $ + 2) and $FFFF
+        dw (i - ($ - 2)) and $FFFF
 }
 
 macro BLNEQ ra, rb, i {
         db $04 or (ra shl 4)
         db rb  or (1 shl 4) or $80
-        dw (i - $ + 2) and $FFFF
+        dw (i - ($ - 2)) and $FFFF
 }
 
 macro BLLES ra, rb, i {
         db $04 or (ra shl 4)
         db rb  or (2 shl 4) or $80
-        dw (i - $ + 2) and $FFFF
+        dw (i - ($ - 2)) and $FFFF
 }
 
 macro BLGREEQ ra, rb, i {
         db $04 or (ra shl 4)
         db rb  or (3 shl 4) or $80
-        dw (i - $ + 2) and $FFFF
+        dw (i - ($ - 2)) and $FFFF
 }
 
 macro BLGRE ra, rb, i {
         db $04 or (ra shl 4)
         db rb  or (4 shl 4) or $80
-        dw (i - $ + 2) and $FFFF
+        dw (i - ($ - 2)) and $FFFF
 }
 
 macro BLLESEQ ra, rb, i {
         db $04 or (ra shl 4)
         db rb  or (5 shl 4) or $80
-        dw (i - $ + 2) and $FFFF
+        dw (i - ($ - 2)) and $FFFF
 }
 
 macro BLABOVE ra, rb, i {
         db $04 or (ra shl 4)
         db rb  or (6 shl 4) or $80
-        dw (i - $ + 2) and $FFFF
+        dw (i - ($ - 2)) and $FFFF
 }
 
 ; LNK format: [4 opcode][4 Ra][4 Rb][3 Cond][1 unused] = 2 bytes

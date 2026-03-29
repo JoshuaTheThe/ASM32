@@ -3,6 +3,9 @@
 
 char *keyword = "\002IF\004ELSE\005WHILE\005BEGIN\003END\011PROCEDURE\006DEFINE\003SET\003AND\003XOR\002OR\007INTEGER\004CHAR";
 
+static token lookahead = {0};
+static bool  has_lookahead = false;
+
 int lc_identifier(token *tok)
 {
         char *p = keyword;
@@ -20,7 +23,7 @@ int lc_identifier(token *tok)
         return TOKEN_SYMBOL;
 }
 
-token lc_next(FILE *fp)
+token lc_actual_next(FILE *fp)
 {
         char x;
         do
@@ -68,5 +71,30 @@ token lc_next(FILE *fp)
                 tok.type = lc_identifier(&tok);
                 ungetc(x, fp);
         }
+        return tok;
+}
+
+token lc_next(FILE *fp)
+{
+        if (has_lookahead)
+        {
+                has_lookahead = false;
+                return lookahead;            
+        }
+
+        return lc_actual_next(fp);
+}
+
+void lc_unget(token tok)
+{
+        assert(!has_lookahead && "double unget");
+        lookahead     = tok;
+        has_lookahead = true;
+}
+
+token lc_peek(FILE *fp)
+{
+        token tok = lc_next(fp);
+        lc_unget(tok);
         return tok;
 }

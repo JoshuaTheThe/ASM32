@@ -51,12 +51,7 @@ int main(int argc, char **argv)
         {
                 FILE *fin = fopen(argv[2], "r");
                 if (!fin) return -1;
-                token tok = lc_next(fin);
-                while (tok.type != TOKEN_EOF)
-                {
-                        printf("tk: type=%d, '%s', %d\n", tok.type, tok.identifier, tok.num);
-                        tok = lc_next(fin);
-                }
+                lc_program(fin);
                 fclose(fin);
         }
 }

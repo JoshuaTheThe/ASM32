@@ -4,10 +4,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
+#include <assert.h>
 
-#define MAX_IDENTIFIER 64
+#define MAX_IDENTIFIER 16
+#define MAX_SYMBOLS 256
 
 enum
 {
@@ -44,9 +48,28 @@ enum
 typedef struct
 {
         char identifier[MAX_IDENTIFIER];
+        bool isfunction,allocated;
+        union
+        {
+                struct
+                {
+                        int argument_indexes[4]; // symbol indexes, max of four args
+                        int argument_count;
+                } function;
+
+                int variable; // offset
+        } as;
+} symbol;
+
+typedef struct
+{
+        char identifier[MAX_IDENTIFIER];
         int type,num;
 } token;
 
 token lc_next(FILE *fp);
+void lc_program(FILE *fp);
+void lc_unget(token tok);
+token lc_peek(FILE *fp);
 
 #endif

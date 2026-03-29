@@ -251,7 +251,7 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                                 if (error && *error) return;
                         }
 
-                        const virtual new_pc = (pc & 0xF0000000) | ((uint32_t)((int32_t)(pc & 0x0FFFFFFF) + I16) & 0x0FFFFFFF);
+                        const virtual new_pc = (pc & 0xF0000000) | ((uint32_t)((int32_t)(pc & 0x0FFFFFFF) + *(int32_t *)&I16) & 0x0FFFFFFF);
                         asm32_write_register(cpu, mem, 0x0F, new_pc, error);
                 }
                 fprintf(stderr, "BXX\n");

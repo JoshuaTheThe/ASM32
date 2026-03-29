@@ -237,6 +237,7 @@ macro LDR ra, rb {
 }
 
 macro ENTER space {
+        local _body
         PUS     $0C
         PUS     $0D
         LDI     $0D, $40 + (space)
@@ -245,7 +246,7 @@ macro ENTER space {
         ;       set new sp
         STW     $00, $0C, $00
         ;       set new pc = body
-        LDI     $0D, .body
+        LDI     $0D, _body
         STW     $0D, $0C, $3C
         ;       set parent window
         CTX     $0D
@@ -260,7 +261,7 @@ macro ENTER space {
         PUL     $0D
         PUL     $0C
         LNK     $00,$00
-.body:  ORR     $07,$00,$00
+_body:  ORR     $07,$00,$00
         ;       push args
         PUS     $03
         PUS     $04

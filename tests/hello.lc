@@ -7,5 +7,5 @@ end;
 
 procedure main []
 begin
-        putchar [^["Hello, World!\n" + 1]];        
+        putchar [66];
 end;

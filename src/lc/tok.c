@@ -71,6 +71,33 @@ token lc_actual_next(FILE *fp)
                 tok.type = lc_identifier(&tok);
                 ungetc(x, fp);
         }
+        else if (x == '"')
+        {
+                x = fgetc(fp);
+                while (x != '"' && x != EOF)
+                {
+                        if (x == '\\')
+                        {
+                                x = fgetc(fp);
+                                switch (x)
+                                {
+                                        case 'n':  tok.identifier[tok.num++] = '\n'; break;
+                                        case 't':  tok.identifier[tok.num++] = '\t'; break;
+                                        case '0':  tok.identifier[tok.num++] = '\0'; break;
+                                        case '\\': tok.identifier[tok.num++] = '\\'; break;
+                                        case '"':  tok.identifier[tok.num++] = '"';  break;
+                                        default:   tok.identifier[tok.num++] = x;    break;
+                                }
+                        }
+                        else
+                        {
+                                tok.identifier[tok.num++] = x;
+                        }
+                        x = fgetc(fp);
+                        if (tok.num >= 64) break;
+                }
+                tok.type = TOKEN_STRING;
+        }
         return tok;
 }
 

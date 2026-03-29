@@ -12,12 +12,14 @@
 
 #define MAX_IDENTIFIER 16
 #define MAX_SYMBOLS 256
+#define MAX_STRINGS 256
 
 enum
 {
         TOKEN_EOF,
         TOKEN_NUMBER,
         TOKEN_SYMBOL,
+        TOKEN_STRING,
         TOKEN_ADD,
         TOKEN_SUB,
         TOKEN_CAR,

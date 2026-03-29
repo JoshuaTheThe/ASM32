@@ -5,7 +5,7 @@ end;
 
 procedure main [c: integer; v: ^char]
 begin
-        define a: integer;
-        set [a; foo [8; 8]];
-        return a;
+        define msg: ^char;
+        set [msg; "Hello, World!\n"];
+        return msg;
 end;

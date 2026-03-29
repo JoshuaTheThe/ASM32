@@ -12,16 +12,27 @@ _FOO:		ENTER $04
 _MAIN:		ENTER $04
 		LDI   $08, $00000000
 		PUS   $08
-		LDI   $08, $00000008
-		LDI   $09, $00000008
-		ORR   $04, $09, $09
-		ORR   $03, $08, $08
-		BL    $00, $00, _FOO
-		ORR   $0a, $02, $02
-		STW   $0a, $07, $0010
-		LDW   $0a, $07, $0010
-		ORR   $02, $0a, $0a
+		LDI   $08, __STR00000000
+		STW   $08, $07, $0010
+		LDW   $08, $07, $0010
+		ORR   $02, $08, $08
 		LEAVE
 		LEAVE
+__STR00000000:
+		db $0e
+		db $48
+		db $65
+		db $6c
+		db $6c
+		db $6f
+		db $2c
+		db $20
+		db $57
+		db $6f
+		db $72
+		db $6c
+		db $64
+		db $21
+		db $0a
 		times 4096 - ($ - $$) db 0
 _stack:

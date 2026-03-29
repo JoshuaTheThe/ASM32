@@ -8,6 +8,13 @@ int register_ptr_depth[16] = {0};
 int last_register[16] = {0}, last_register_ptr = 1;
 int current_function = -1;
 int current_function_offset = 0;
+char strings[MAX_STRINGS][MAX_IDENTIFIER] = {0};
+int string_cnt = 0;
+
+static void lc_create_string(const char *c_str)
+{
+        strncpy(strings[string_cnt++], c_str, MAX_IDENTIFIER);
+}
 
 static int lc_allocate_register(int type, int depth)
 {
@@ -80,6 +87,13 @@ static void lc_primary(FILE *fp)
         token tok = lc_next(fp);
         switch (tok.type)
         {
+                case TOKEN_STRING:
+                        {
+                                int r = lc_allocate_register(TYPE_INTEGER, 0);
+                                printf("\t\tLDI   $%.2x, __STR%.8x\n", r, string_cnt);
+                                lc_create_string(tok.identifier);
+                        }
+                        break;
                 case TOKEN_SYMBOL:
                         {
                                 int idx = lc_find(tok.identifier);
@@ -351,6 +365,14 @@ void lc_program(FILE *fp)
                         assert(0 && "syntax error");
                 }
         } while (tok.type != TOKEN_EOF);
+
+        for (int i = 0; i < string_cnt; ++i)
+        {
+                printf("__STR%.8x:\n", i);
+                printf("\t\tdb $%.2lx\n", strlen(strings[i]));
+                for (int j = 0; strings[i][j]; ++j)
+                        printf("\t\tdb $%.2x\n", strings[i][j]);
+        }
         printf("\t\ttimes 4096 - ($ - $$) db 0\n");
         printf("_stack:\n");
 }

@@ -2,6 +2,8 @@
 _start:		LDI   $00, _stack
 		BL    $00, $00, _MAIN
 		HLT
+_FOO:		ENTER $04
+		LEAVE
 _PUTCHAR:		ENTER $04
 		LDI   $08, $00000000
 		PUS   $08

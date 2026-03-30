@@ -235,7 +235,7 @@ static void lc_stmt(FILE *fp)
                         static int label = 0;
                         int my_label = label++;
                         
-                        printf("\t\tLDI   $%.2x, $00000000", zero);
+                        printf("\t\tXOR   $%.2x, $%.2x, $%.2x", zero, zero, zero);
                         printf("\t\tBEQ   $%.2x, $%.2x, .Lelse%.8x\n", reg, zero, my_label);
                         lc_free_register(reg);
                         lc_free_register(zero);

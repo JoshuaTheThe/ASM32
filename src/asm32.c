@@ -199,7 +199,7 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
         const uint32_t Cond       = (instruction >> 12) & 0x07;
         const uint32_t Link       = (instruction >> 15) & 0x01;
         const uint8_t  Opcode     = instruction & 0xF;
-
+#ifdef DBG
         fprintf(stderr, "Ra: %.2x ", Ra);
         fprintf(stderr, "Rb: %.2x ", Rb);
         fprintf(stderr, "Rc: %.2x ", Rc);
@@ -210,7 +210,7 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
         fprintf(stderr, "CON:%.1x ", Cond);
         fprintf(stderr, "LNK:%.1x ", Link);
         fprintf(stderr, "OPC:%.8x ", Opcode);
-
+#endif
         uint32_t Temp=0,Temp2     = 0;
         uint32_t Base             = 0;
 
@@ -218,11 +218,15 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
         {
         case 0x00:      // CTX
                 asm32_write_register(cpu, mem, Ra, cpu->rp, error);
+#ifdef DBG
                 fprintf(stderr, "CTX\n");
+#endif
                 break;
         case 0x01:      // CTS
                 cpu->rp = asm32_read_register(cpu, mem, Ra, error);
+#ifdef DBG
                 fprintf(stderr, "CTS\n");
+#endif
                 break;
         case 0x2:       // LDW/LDB
                 Base = asm32_read_register(cpu, mem, Rb, error);
@@ -231,7 +235,9 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                                       asm32_read_byte(cpu, mem, (uint32_t)(*(int32_t *)&Base + *(int32_t *)&I11), error);
                 if (error && *error) return;
                 asm32_write_register(cpu, mem, Ra, Temp, error);
+#ifdef DBG
                 fprintf(stderr, "LDX\n");
+#endif
                 break;
         case 0x3:       // STW/STB
                 Base = asm32_read_register(cpu, mem, Rb, error);
@@ -240,7 +246,9 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                 if (error && *error) return;
                 (WordOrByte) ? asm32_write_word(cpu, mem, (uint32_t)(*(int32_t *)&Base + *(int32_t *)&I11), Temp, error) :
                                asm32_write_byte(cpu, mem, (uint32_t)(*(int32_t *)&Base + *(int32_t *)&I11), Temp, error);
+#ifdef DBG
                 fprintf(stderr, "STX\n");
+#endif
                 break;
         case 0x4:       // Bxx
                 if (asm32_is_condition_true(cpu, mem, Ra, Rb, Cond, error))
@@ -254,7 +262,9 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                         const virtual new_pc = (pc & 0xF0000000) | ((uint32_t)((int32_t)(pc & 0x0FFFFFFF) + *(int32_t *)&I16) & 0x0FFFFFFF);
                         asm32_write_register(cpu, mem, 0x0F, new_pc, error);
                 }
+#ifdef DBG
                 fprintf(stderr, "BXX\n");
+#endif
                 break;
         case 0x5:       // LNKXX
                 if (asm32_is_condition_true(cpu, mem, Ra, Rb, Cond, error))
@@ -263,7 +273,9 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                         if (error && *error) return;
                         asm32_write_register(cpu, mem, 0x0F, Temp, error);
                 }
+#ifdef DBG
                 fprintf(stderr, "LXX\n");
+#endif
                 break;
         case 0x6:       // PUL
                 Temp = asm32_read_register(cpu, mem, 0x00, error);
@@ -274,7 +286,9 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                 Temp = asm32_read_word(cpu, mem, Temp, error);
                 if (error && *error) return;
                 asm32_write_register(cpu, mem, Ra, Temp, error);
+#ifdef DBG
                 fprintf(stderr, "PUL\n");
+#endif
                 break;
         case 0x7:       // PUS
                 Temp = asm32_read_register(cpu, mem, 0x00, error);
@@ -285,7 +299,9 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                 if (error && *error) return;
                 Temp += 4;
                 asm32_write_register(cpu, mem, 0x00, Temp, error);
+#ifdef DBG
                 fprintf(stderr, "PUS\n");
+#endif
                 break;
         case 0x8:       // ADD
                 Temp  = asm32_read_register(cpu, mem, Rb, error);
@@ -294,7 +310,9 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                 if (error && *error) return;
                 Temp  = Temp + Temp2;
                 asm32_write_register(cpu, mem, Ra, Temp, error);
+#ifdef DBG
                 fprintf(stderr, "ADD\n");
+#endif
                 break;
         case 0x9:       // SUB
                 Temp  = asm32_read_register(cpu, mem, Rb, error);
@@ -303,7 +321,9 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                 if (error && *error) return;
                 Temp  = Temp - Temp2;
                 asm32_write_register(cpu, mem, Ra, Temp, error);
+#ifdef DBG
                 fprintf(stderr, "SUB\n");
+#endif
                 break;
         case 0xA:       // XOR
                 Temp  = asm32_read_register(cpu, mem, Rb, error);
@@ -312,7 +332,9 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                 if (error && *error) return;
                 Temp  = Temp ^ Temp2;
                 asm32_write_register(cpu, mem, Ra, Temp, error);
+#ifdef DBG
                 fprintf(stderr, "XOR\n");
+#endif
                 break;
         case 0xB:       // ORR
                 Temp  = asm32_read_register(cpu, mem, Rb, error);
@@ -321,7 +343,9 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                 if (error && *error) return;
                 Temp  = Temp | Temp2;
                 asm32_write_register(cpu, mem, Ra, Temp, error);
+#ifdef DBG
                 fprintf(stderr, "ORR\n");
+#endif
                 break;
         case 0xC:       // AND
                 Temp  = asm32_read_register(cpu, mem, Rb, error);
@@ -330,7 +354,9 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                 if (error && *error) return;
                 Temp  = Temp & Temp2;
                 asm32_write_register(cpu, mem, Ra, Temp, error);
+#ifdef DBG
                 fprintf(stderr, "AND\n");
+#endif
                 break;
         case 0xD:       // ROL
                 Temp  = asm32_read_register(cpu, mem, Rb, error);
@@ -340,14 +366,20 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
                 Temp2 = Temp2 & 0x1F;
                 Temp  = (Temp << Temp2) | (Temp >> (32 - Temp2));
                 asm32_write_register(cpu, mem, Ra, Temp, error);
+#ifdef DBG
                 fprintf(stderr, "ROL\n");
+#endif
                 break;
         case 0xE:       // EX
+#ifdef DBG
                 fprintf(stderr, "EX,HLT\n");
+#endif
                 cpu->halt = true;
                 break;
         case 0xF:       // LDI
+#ifdef DBG
                 fprintf(stderr, "LDI\n");
+#endif
                 asm32_write_register(cpu, mem, Ra, I32, error);
                 break;
         }

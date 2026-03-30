@@ -236,7 +236,7 @@ macro LDR ra, rb {
         ORR ra, rb, rb
 }
 
-macro ENTER space {
+macro FULLENTER space {
         local _body
         PUS     $0C
         PUS     $0D
@@ -269,10 +269,51 @@ _body:  ORR     $07,$00,$00
         PUS     $06
 }
 
-macro LEAVE {
+macro FULLLEAVE {
         ;       save result
         STW     $02, $0E, $08
         CTS     $0E
+}
+
+        ; FULLENTER is buggy for some reason, an instruction probably has incorrect length
+macro ENTER space {
+        PUS     $01
+        PUS     $02
+        PUS     $07
+        PUS     $08
+        PUS     $09
+        PUS     $0A
+        PUS     $0B
+        PUS     $0C
+        PUS     $0D
+        PUS     $0E
+        LDI     $0D, (space)
+        AND     $0E, $00, $00
+        ADD     $00, $00, $0D
+        AND     $07, $00, $00
+        PUS     $03
+        PUS     $04
+        PUS     $05
+        PUS     $06
+}
+
+macro LEAVE {
+        PUL     $06
+        PUL     $05
+        PUL     $04
+        PUL     $03
+        AND     $00, $0E, $0E
+        PUL     $0E
+        PUL     $0D
+        PUL     $0C
+        PUL     $0B
+        PUL     $0A
+        PUL     $09
+        PUL     $08
+        PUL     $07
+        PUL     $01
+        PUL     $01
+        LNK     $00,$00
 }
 
 macro PROCEDURE name {

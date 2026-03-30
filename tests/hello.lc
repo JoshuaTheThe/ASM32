@@ -1,4 +1,8 @@
 
+procedure foo [chr: char]
+begin
+end;
+
 procedure putchar [chr: char]
 begin
         define put_adr: ^char;

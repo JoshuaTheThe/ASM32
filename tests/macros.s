@@ -240,13 +240,13 @@ macro FULLENTER space {
         local _body
         PUS     $0C
         PUS     $0D
-        LDI     $0D, $40 + (space)
+        LDI     $0D, ($40 + (space))
         AND     $0C, $00, $00
         ADD     $00, $00, $0D
         ;       set new sp
         STW     $00, $0C, $00
         ;       set new pc = body
-        LDI     $0D, _body
+        LDI     $0D, (_body)
         STW     $0D, $0C, $3C
         ;       set parent window
         CTX     $0D

@@ -1,13 +1,21 @@
 
-procedure foo [chr: char]
-begin
-end;
-
 procedure putchar [chr: char]
 begin
         define put_adr: ^char;
         set [put_adr; 8192-4];
         set [^put_adr; chr];
+end;
+
+procedure length [str: ^char]
+begin
+        define len: char;
+        set [len; ^str];
+        return len;
+end;
+
+procedure putstring [str: ^char]
+begin
+        length [str];
 end;
 
 procedure main []

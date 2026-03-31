@@ -4,6 +4,8 @@
 #include<string.h>
 #include<asm32.h>
 
+#define DBG
+
 // TODO!(make the upper 4 bits unaffected by address manipulation),,, or not
 // it doesn't really make it unsafe
 
@@ -210,6 +212,8 @@ void asm32_execute(asm32_t *const cpu, memory *mem, bool *const error)
         fprintf(stderr, "CON:%.1x ", Cond);
         fprintf(stderr, "LNK:%.1x ", Link);
         fprintf(stderr, "OPC:%.8x ", Opcode);
+        fprintf(stderr, "AT :%.8x ", pc);
+        fprintf(stderr, "INS:%.16lx ", instruction);
 #endif
         uint32_t Temp=0,Temp2     = 0;
         uint32_t Base             = 0;

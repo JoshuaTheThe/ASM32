@@ -35,11 +35,11 @@ struct  SEGMENT
 ```
 
 ## Interrupts
-`IAMNOW $00:C0` on raise, set `R13` to the code and `R14` to the old `RP`.
+`CTS $00:C0` on raise, set `R13` to the code and `R14` to the old `RP`.
 `R13:=code,R14:=RP,RP:=0H:000000C0H`
 
 ## Protection
-if we are a user program (PC in a USER Segment), do `IAMNOW $00:C0` with interrupt $01 on violation
+if we are a user program (PC in a USER Segment), do `CTS $00:C0` with interrupt $01 on violation
 
 # Boot up
 On bootup, the Register File Pointer is set to `$C0`, and the Program Counter is set to `$00`
